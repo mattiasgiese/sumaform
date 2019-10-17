@@ -9,6 +9,22 @@ if [ "$1" = "-d" -o "$1" = "--dont-fail" ]; then
 fi
 RESULT=0
 
+sync_repos()
+{
+  test -z "$SERVER" && { echo "SERVER not set" ; exit 1 ; }
+  repos=`salt-call --out txt --local --file-root=/root/salt grains.get repos_to_sync  | cut -d' ' -f2- 2>/dev/null`
+
+  if [ -n "$repos" ]; then
+    cmd="ssh -o StrictHostKeyChecking=no $SERVER \"spacewalk-repo-sync --latest --type yum"
+    for i in $repos ; do
+      cmd="$cmd --channel $i"
+    done
+    cmd="$cmd\""
+    echo "syncing repos '$repos' on server"
+    eval $cmd
+  fi
+}
+
 stage() {
   rake "cucumber:$1"
   if [ $? -ne 0 ]; then
@@ -29,6 +45,7 @@ parallel_stage() {
 if [ -z "$1" ]; then
   stage core
   stage reposync
+  sync_repos
   stage init_clients
   stage secondary
   stage secondary_parallelizable
@@ -39,6 +56,7 @@ fi
 if [ "$1" = "parallel" ]; then
   stage core
   stage reposync
+  sync_repos
   parallel_stage init_clients
   stage secondary
   parallel_stage secondary_parallelizable
