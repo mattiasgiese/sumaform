@@ -47,7 +47,9 @@ server_setup:
     - name: /usr/lib/susemanager/bin/migration.sh -l /var/log/susemanager_setup.log -s
     - creates: /root/.MANAGER_SETUP_COMPLETE
     - require:
+      {% if not grains.get('no_install') | default(false) %}
       - pkg: server_packages
+      {% endif %}
       - file: environment_setup_script
 
 ca_cert_checksum:

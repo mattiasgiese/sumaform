@@ -27,7 +27,7 @@ locals {
   resource_name_prefix = "${var.base_configuration["name_prefix"]}${var.name}"
 
   availability_zone = var.base_configuration["availability_zone"]
-  region = var.base_configuration["region"]
+  region            = var.base_configuration["region"]
 }
 
 resource "aws_instance" "instance" {
@@ -90,7 +90,7 @@ resource "aws_volume_attachment" "data_disk_attachment" {
 /** START: provisioning */
 resource "null_resource" "host_salt_configuration" {
   depends_on = [aws_instance.instance, aws_volume_attachment.data_disk_attachment]
-  count = var.quantity
+  count      = var.quantity
 
   connection {
     host         = aws_instance.instance[count.index].associate_public_ip_address ? aws_instance.instance[count.index].public_dns : aws_instance.instance[count.index].private_dns
@@ -109,14 +109,14 @@ resource "null_resource" "host_salt_configuration" {
 
     content = yamlencode(merge(
       {
-        hostname: replace(aws_instance.instance[count.index].private_dns, ".${local.region == "us-east-1" ? "ec2.internal" : "${local.region}.compute.internal"}", "")
-        domain: local.region == "us-east-1" ? "ec2.internal" : "${local.region}.compute.internal"
-        use_avahi: false
+        hostname : replace(aws_instance.instance[count.index].private_dns, ".${local.region == "us-east-1" ? "ec2.internal" : "${local.region}.compute.internal"}", "")
+        domain : local.region == "us-east-1" ? "ec2.internal" : "${local.region}.compute.internal"
+        use_avahi : false
 
-//        hostname                  = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}"
-//        domain                    = var.base_configuration["domain"]
-//        use_avahi                 = var.base_configuration["use_avahi"]
-//        additional_network        = var.base_configuration["additional_network"]
+        //        hostname                  = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}"
+        //        domain                    = var.base_configuration["domain"]
+        //        use_avahi                 = var.base_configuration["use_avahi"]
+        //        additional_network        = var.base_configuration["additional_network"]
         timezone                  = var.base_configuration["timezone"]
         testsuite                 = var.base_configuration["testsuite"]
         roles                     = var.roles
@@ -137,6 +137,11 @@ resource "null_resource" "host_salt_configuration" {
         reset_ids                     = true
         ipv6                          = var.ipv6
         data_disk_device              = contains(var.roles, "server") || contains(var.roles, "proxy") || contains(var.roles, "mirror") ? "xvdf" : null
+
+        // optimizations for cloud install
+        no_install = contains(var.roles, "server") ? true : false
+        no_update  = contains(var.roles, "mirror") ? true : false
+
       },
     var.grains))
     destination = "/tmp/grains"
@@ -154,7 +159,7 @@ resource "null_resource" "host_salt_configuration" {
 /** END: provisioning */
 
 output "configuration" {
-  depends_on = [aws_instance.instance,  null_resource.host_salt_configuration]
+  depends_on = [aws_instance.instance, null_resource.host_salt_configuration]
   value = {
     ids          = length(aws_instance.instance) > 0 ? aws_instance.instance[*].id : []
     hostnames    = length(aws_instance.instance) > 0 ? aws_instance.instance.*.private_dns : []
