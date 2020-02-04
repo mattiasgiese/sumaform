@@ -21,6 +21,14 @@ locals {
     var.provider_settings,
     contains(var.roles, "virthost") ? { cpu_model = "host-model", xslt = file("${path.module}/sysinfos.xsl") } : {},
     contains(var.roles, "pxe_boot") ? { xslt = file("${path.module}/pxe.xsl") } : {})
+
+  user_data = {
+    "ssh_pwauth": true,
+    "chpasswd": {
+      "expire": false,
+      "list": "root:linux"
+    },
+  }
 }
 
 resource "libvirt_volume" "main_disk" {
@@ -30,13 +38,20 @@ resource "libvirt_volume" "main_disk" {
   count            = var.quantity
 }
 
+resource "libvirt_cloudinit_disk" "cloudinit_disk" {
+  name           = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}-cloudinit-disk"
+  user_data      = "#cloud-config\n${yamlencode(local.user_data)}"
+  pool             = var.base_configuration["pool"]
+  count            = contains(["opensuse150", "opensuse151", "sles12sp4"], var.image) ? 1 : 0
+}
+
 resource "libvirt_domain" "domain" {
   name       = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}"
   memory     = local.provider_settings["memory"]
   vcpu       = local.provider_settings["vcpu"]
   running    = local.provider_settings["running"]
   count      = var.quantity
-  qemu_agent = true
+  qemu_agent = length(libvirt_cloudinit_disk.cloudinit_disk) > 0
 
   // copy host CPU model to guest to get the vmx flag if present
   cpu = {
@@ -53,6 +68,8 @@ resource "libvirt_domain" "domain" {
       volume_id = disk.value.volume_id
     }
   }
+
+  cloudinit = length(libvirt_cloudinit_disk.cloudinit_disk) == var.quantity ? libvirt_cloudinit_disk.cloudinit_disk[count.index].id : null
 
   dynamic "network_interface" {
     for_each = slice(
