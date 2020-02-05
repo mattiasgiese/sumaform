@@ -42,7 +42,7 @@ resource "libvirt_cloudinit_disk" "cloudinit_disk" {
   name           = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}-cloudinit-disk"
   user_data      = "#cloud-config\n${yamlencode(local.user_data)}"
   pool             = var.base_configuration["pool"]
-  count            = contains(["opensuse150", "opensuse151", "sles12sp4"], var.image) ? 1 : 0
+  count            = contains(["opensuse150", "opensuse151", "sles12sp1", "sles12sp2", "sles12sp3", "sles12sp4", "sles15", "sles15sp1", "sles15sp2"], var.image) ? 1 : 0
 }
 
 resource "libvirt_domain" "domain" {
