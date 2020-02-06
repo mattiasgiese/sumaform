@@ -1,11 +1,11 @@
 terraform {
-    required_version = "~> 0.12.9"
+    required_version = "~> 0.11.7"
 }
 
 resource "aws_instance" "instance" {
   ami = "${var.ami}"
   instance_type = "${var.instance_type}"
-  count = "${var.quantity}"
+  count = "${var.count}"
   availability_zone = "${var.availability_zone}"
   key_name = "${var.key_name}"
   monitoring = "${var.monitoring}"
@@ -23,7 +23,7 @@ resource "aws_instance" "instance" {
 }
 
 resource "null_resource" "host_salt_configuration" {
-  count = "${var.quantity}"
+  count = "${var.count}"
 
   triggers {
     instance_id = "${element(aws_instance.instance.*.id, count.index)}"
@@ -66,7 +66,7 @@ EOF
 
   provisioner "remote-exec" {
     inline = [
-      "sh /root/salt/first_deployment_highstate.sh"
+      "bash /root/salt/first_deployment_highstate.sh"
     ]
   }
 }

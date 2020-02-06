@@ -28,7 +28,7 @@ variable "volume_size" {
   default = 10
 }
 
-variable "quantity"  {
+variable "count"  {
   description = "Number of hosts like this one"
   default = 1
 }
@@ -123,6 +123,11 @@ variable "monitored" {
   default = false
 }
 
+variable "apparmor" {
+  description = "whether AppArmor access control should be installed"
+  default = false
+}
+
 variable "timezone" {
   description = "Timezone setting for this VM"
   default = "Europe/Berlin"
@@ -130,6 +135,16 @@ variable "timezone" {
 
 variable "additional_repos" {
   description = "extra repositories in the form {label = url}, see README_ADVANCED.md"
+  default = {}
+}
+
+variable "additional_repos_only" {
+  description = "whether to exclusively use additional repos"
+  default = false
+}
+
+variable "additional_certs" {
+  description = "extra SSL certficates in the form {name = url}, see README_ADVANCED.md"
   default = {}
 }
 
@@ -150,5 +165,31 @@ variable "mirror_private_name" {
 
 variable "gpg_keys" {
   description = "salt/ relative paths of gpg keys that you want to add to your VMs, see README_ADVANCED.md"
+  default = []
+}
+
+variable "ssh_user" {
+  description = "user name to use with ssh connection"
+  type = "string"
+  default = "ec2-user"
+}
+
+variable "authorized_keys" {
+  description = "addtional ssh public keys to authorize access"
+  default = []
+}
+
+variable "no_install" {
+  description = "do not install product packages"
+  default = false
+}
+
+variable "testsuite" {
+  description = "install testsuite packages"
+  default = false
+}
+
+variable "dependencies" {
+  type = "list"
   default = []
 }
