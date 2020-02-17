@@ -63,7 +63,7 @@ resource "null_resource" "provisioning" {
 
   provisioner "file" {
     source      = "salt"
-    destination = "/root"
+    destination = "/tmp"
   }
 
   provisioner "file" {
@@ -95,12 +95,14 @@ resource "null_resource" "provisioning" {
         data_disk_device              = contains(var.roles, "suse_manager_server") || contains(var.roles, "suse_manager_proxy") || contains(var.roles, "mirror") ? "vdb" : null
       },
     var.grains))
-    destination = "/etc/salt/grains"
+    destination = "/tmp/grains"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "sh /root/salt/first_deployment_highstate.sh",
+      "sudo mv /tmp/grains /etc/salt/grains",
+      "sudo mv /tmp/salt /root",
+      "sudo bash /root/salt/first_deployment_highstate.sh"
     ]
   }
 }
