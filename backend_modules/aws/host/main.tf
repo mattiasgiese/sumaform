@@ -69,7 +69,7 @@ resource "aws_ebs_volume" "data_disk" {
   type              = lookup(var.volume_provider_settings, "type", "sc1")
   snapshot_id       = lookup(var.volume_provider_settings, "volume_snapshot_id", null)
   tags = {
-    Name = "${local.resource_name_prefix}-data-volume-${count.index}"
+    Name = "${local.resource_name_prefix}-data-volume${var.quantity > 1 ? "-${count.index + 1}" : ""}"
   }
 }
 
@@ -109,9 +109,9 @@ resource "null_resource" "host_salt_configuration" {
 
     content = yamlencode(merge(
       {
-        hostname: replace(aws_instance.instance[count.index].private_dns, ".${local.region == "us-east-1" ? "ec2.internal" : "${var.region}.compute.internal"}", "")
+        hostname: replace(aws_instance.instance[count.index].private_dns, ".${local.region == "us-east-1" ? "ec2.internal" : "${local.region}.compute.internal"}", "")
         domain: local.region == "us-east-1" ? "ec2.internal" : "${local.region}.compute.internal"
-        use_avahi: False
+        use_avahi: false
 
 //        hostname                  = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}"
 //        domain                    = var.base_configuration["domain"]
@@ -136,7 +136,7 @@ resource "null_resource" "host_salt_configuration" {
         connect_to_additional_network = var.connect_to_additional_network
         reset_ids                     = true
         ipv6                          = var.ipv6
-        data_disk_device              = contains(var.roles, "suse_manager_server") || contains(var.roles, "suse_manager_proxy") || contains(var.roles, "mirror") ? "vdb" : null
+        data_disk_device              = contains(var.roles, "server") || contains(var.roles, "proxy") || contains(var.roles, "mirror") ? "xvdf" : null
       },
     var.grains))
     destination = "/tmp/grains"
