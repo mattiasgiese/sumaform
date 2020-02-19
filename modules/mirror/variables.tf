@@ -32,6 +32,11 @@ variable "provider_settings" {
   default     = {}
 }
 
+variable "repository_disk_size" {
+  description = "Size of an aditional disk for /var/spacewalk partition, defined in GiB"
+  default     = 500
+}
+
 variable "volume_provider_settings" {
   description = "Map of volume-provider-specific settings, see the backend-specific README file"
   default     = {}
