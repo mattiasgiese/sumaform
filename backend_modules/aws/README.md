@@ -2,14 +2,13 @@
 
 ## Overview
 
-Modules provided by this project will create:
+Base Module will create:
  - a VPC
  - two subnets
    - one private, that can only access other hosts in the VPC
    - one public, that can also access the Internet and accepts connections from an IP whitelist
  - security groups, routing tables, Internet gateways as appropriate
- - one `mirror` host in the public network that works as a bastion host
- - SUSE Manager servers, clients and proxies in the private network
+ - one `mirror` host should be created in the public network to work as a bastion host
 
 This architecture is loosely inspired from [Segment's AWS Stack](https://segment.com/blog/the-segment-aws-stack/).
 
@@ -18,10 +17,9 @@ This architecture is loosely inspired from [Segment's AWS Stack](https://segment
 You will need:
  - an AWS account, specifically an Access Key ID and a Secret Access Key
  - [an SSH key pair](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#having-ec2-create-your-key-pair) valid for that account
- - IDs for a subnet and a security group that can be used to access an instance from your host. The easiest way to accomplish this is to use the `modules/aws/network` module in this project, which will create a VPC with a public subnet and security group
  - the name of the region you want to use.
 
-SUSE employees using openbare already have AMI images uploaded and data snapshots for the us-east-1 region; others have to follow instructions in [HOW_TO_UPLOAD.md](modules/aws/images/HOW_TO_UPLOAD.md).
+~~SUSE employees using openbare already have AMI images uploaded and data snapshots for the us-east-1 region; others have to follow instructions in [HOW_TO_UPLOAD.md](modules/aws/images/HOW_TO_UPLOAD.md).~~
 
 ## Select AWS backend to be used
 
@@ -31,7 +29,7 @@ Create a symbolic link to the `aws` backend module directory inside the `modules
 
 In addition to acting as a bastion host for all other instances, the `mirror` host serves all repos and packages used by other instances. It works similarly to the one for the libvirt backend, allowing instances in the private subnet to be completely disconnected from the Internet.
 
-Please note that content in `mirror` must be refreshed manually at this time, see comments in [modules/aws/mirror/main.tf](modules/aws/mirror/main.tf).
+Please note that content in `mirror` must be refreshed manually at this time~~, see comments in [modules/aws/mirror/main.tf](modules/aws/mirror/main.tf).~~
 
 ## Accessing instances
 
