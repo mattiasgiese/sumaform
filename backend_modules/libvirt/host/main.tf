@@ -35,6 +35,7 @@ resource "libvirt_volume" "main_disk" {
   name             = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}-main-disk"
   base_volume_name = "${var.base_configuration["use_shared_resources"] ? "" : var.base_configuration["name_prefix"]}${var.image}"
   pool             = var.base_configuration["pool"]
+  size             = 214748364800
   count            = var.quantity
 }
 
@@ -42,7 +43,7 @@ resource "libvirt_cloudinit_disk" "cloudinit_disk" {
   name           = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}-cloudinit-disk"
   user_data      = "#cloud-config\n${yamlencode(local.user_data)}"
   pool             = var.base_configuration["pool"]
-  count            = contains(["opensuse150", "opensuse151", "sles12sp1", "sles12sp2", "sles12sp3", "sles12sp4", "sles15", "sles15sp1", "sles15sp2"], var.image) ? 1 : 0
+  count            = contains(["opensuse150", "opensuse151", "sles12sp1", "sles12sp2", "sles12sp3", "sles12sp4", "sles15",  "sles15sp2", "centos7"], var.image) ? var.quantity : 0
 }
 
 resource "libvirt_domain" "domain" {
@@ -51,7 +52,7 @@ resource "libvirt_domain" "domain" {
   vcpu       = local.provider_settings["vcpu"]
   running    = local.provider_settings["running"]
   count      = var.quantity
-  qemu_agent = length(libvirt_cloudinit_disk.cloudinit_disk) > 0
+  qemu_agent = length(libvirt_cloudinit_disk.cloudinit_disk) == 0
 
   // copy host CPU model to guest to get the vmx flag if present
   cpu = {
