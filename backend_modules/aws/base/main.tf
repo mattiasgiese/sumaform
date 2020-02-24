@@ -6,7 +6,7 @@ locals {
 
   key_name = lookup(var.provider_settings, "key_name", null)
   key_file = lookup(var.provider_settings, "key_file", null)
-  ssh_user = lookup(var.provider_settings, "ssh_user", null)
+  ssh_user = lookup(var.provider_settings, "ssh_user", "ec2-user")
   bastion_host = lookup(var.provider_settings, "bastion_host", null)
 }
 

@@ -15,9 +15,18 @@ locals {
     ssh_user        = var.base_configuration["ssh_user"]
     public_instance = false
     volume_size     = 50
-    additional_disk = []
     bastion_host    = var.base_configuration["bastion_host"]
-  }, var.provider_settings)
+    instance_type = "t2.micro" },
+    contains(var.roles, "server") ? { instance_type = "t2.medium" } : {},
+    contains(var.roles, "server") && lookup(var.base_configuration, "testsuite", false) ? { instance_type = "t2.large" } : {},
+    contains(var.roles, "server") && lookup(var.grains, "pts", false) ? { instance_type = "t2.xlarge" } : {},
+    contains(var.roles, "proxy") && lookup(var.base_configuration, "testsuite", false) ? { instance_type = "t2.small" } : {},
+    contains(var.roles, "pts_minion") ? { instance_type = "t2.medium" } : {},
+    contains(var.roles, "mirror") ? { instance_type = "t2.micro" } : {},
+    contains(var.roles, "controller") ? { instance_type = "t2.medium" } : {},
+    contains(var.roles, "grafana") ? { instance_type = "t2.medium" } : {},
+    contains(var.roles, "virthost") ? { instance_type = "t2.small" } : {},
+  var.provider_settings)
 
   public_subnet_id          = var.base_configuration.public_subnet_id
   private_subnet_id         = var.base_configuration.private_subnet_id
