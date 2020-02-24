@@ -191,6 +191,11 @@ Steps:
     2. If you now run `terraform destroy` the snapshot will be preserved. 
     However, if one run `terraform apply` again a new snapshot will be created.
 
+#### Force re-creation of existing data disk snapshot
+
+If one keeps the snapshot create resource in is root module, the snapshot will not be re-created unless one forces it by marking the resource as taint.
+To remove the older snapshot and create a new one run: `terraform taint aws_ebs_snapshot.mirror_data_snapshot`
+
 ## Accessing instances
 
 `mirror` is accessible through SSH at the public name noted in outputs.
