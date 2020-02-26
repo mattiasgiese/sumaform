@@ -5,17 +5,19 @@
 // Create a mirror instance using 'terraform apply', and if successful,
 // follow the instruction in backend_modules/aws/README.md
 
-// If you want to base the snapshot on an existing snapshot, either set
+// If you want to base the data disk on an existing snapshot, either set
 // data_volume_snapshot_id to the ID of the snapshot to use, or set it
 // to "${data.aws_ebs_snapshot.data_disk_snapshot.id}" to look up the
 // latest snapshot.
+//
+// For more information see backend_modules/aws/README.md
 
 locals {
   cc_username       = "" // SCC or NCC username
   cc_password       = "" // SCC password
   key_name          = "" // SSH key name
   key_file          = "" // SSH key file
-  name_prefix       = "mirrorsnap"  // change to a prefix if you do not have an exclusive VPC
+  name_prefix       = "mirrorsnap-"
   region            = "eu-west-2"
   availability_zone = "${local.region}a"
   ssh_allowed_ips   = [""] // add your IP address in here
@@ -69,6 +71,28 @@ module "mirror" {
 //    volume_snapshot_id = data.aws_ebs_snapshot.data_disk_snapshot.id
   }
 }
+
+// uncomment next modules if you want to create a snapshot of the existing data disk
+//data "aws_ebs_volume" "data_disk_id" {
+//  most_recent = true
+//
+//  filter {
+//    name   = "tag:Name"
+//    values = ["${module.base.configuration["name_prefix"]}mirror-data-volume"]
+//  }
+//}
+//
+//resource "aws_ebs_snapshot" "mirror_data_snapshot" {
+//  volume_id = data.aws_ebs_volume.data_disk_id.id
+//  timeouts {
+//    create = "60m"
+//    delete = "60m"
+//  }
+//  tags = {
+//    Name = "mirror-data-volume-snapshot"
+//  }
+//}
+
 output "configuration" {
   value = {
     base          = module.base.configuration
