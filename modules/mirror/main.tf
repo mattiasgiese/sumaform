@@ -15,12 +15,13 @@ module "mirror" {
     cc_password       = var.base_configuration["cc_password"]
     ubuntu_distros    = var.ubuntu_distros
     use_mirror_images = var.base_configuration["use_mirror_images"]
+    minima_config     = var.minima_config
   }
 
-  image   = "opensuse151"
+  image = "opensuse151"
 
-  provider_settings = var.provider_settings
-  repository_disk_size = var.repository_disk_size
+  provider_settings        = var.provider_settings
+  repository_disk_size     = var.repository_disk_size
   volume_provider_settings = var.volume_provider_settings
 }
 
