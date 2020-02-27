@@ -5,10 +5,6 @@ locals {
   }
   ami = lookup(local.image_map, var.image, var.image)
 
-  // TODO should be a parameter with default values based on host role like we have on libvirt
-  instance_type = "t2.micro"
-
-
   provider_settings = merge({
     key_name        = var.base_configuration["key_name"]
     key_file        = var.base_configuration["key_file"]
@@ -41,7 +37,7 @@ locals {
 
 resource "aws_instance" "instance" {
   ami                    = local.ami
-  instance_type          = local.instance_type
+  instance_type          = local.provider_settings["instance_type"]
   count                  = var.quantity
   availability_zone      = local.availability_zone
   key_name               = local.provider_settings["key_name"]
@@ -122,9 +118,6 @@ resource "null_resource" "host_salt_configuration" {
         domain : local.region == "us-east-1" ? "ec2.internal" : "${local.region}.compute.internal"
         use_avahi : false
 
-        //        hostname                  = "${local.resource_name_prefix}${var.quantity > 1 ? "-${count.index + 1}" : ""}"
-        //        domain                    = var.base_configuration["domain"]
-        //        use_avahi                 = var.base_configuration["use_avahi"]
         //        additional_network        = var.base_configuration["additional_network"]
         timezone                  = var.base_configuration["timezone"]
         testsuite                 = var.base_configuration["testsuite"]
