@@ -7,7 +7,7 @@ module "base" {
 
   cc_username = "UC7"
   cc_password = "11111"
-  images = ["centos7", "opensuse151"]
+  images = ["opensuse151"]
   mirror = "opensuse.c3sl.ufpr.br"
 
   use_mirror_images = false
