@@ -52,17 +52,16 @@ module "minion1" {
   source = "./modules/minion"
   base_configuration = module.base.configuration
 
-  name = "client"
+  name = "minion1"
   image = "opensuse151"
   server_configuration = module.server.configuration
-  // see modules/client/variables.tf for possible values
+  // see modules/minion/variables.tf for possible values
 }
-
-module "minion" {
+module "minion2" {
   source = "./modules/minion"
   base_configuration = module.base.configuration
 
-  name = "minion"
+  name = "minion2"
   image = "opensuse151"
   server_configuration = module.server.configuration
   // see modules/minion/variables.tf for possible values
