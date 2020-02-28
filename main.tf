@@ -38,8 +38,18 @@ module "server" {
   // if you want to use two networks
 }
 
-module "client" {
-  source = "./modules/client"
+//module "client" {
+//  source = "./modules/client"
+//  base_configuration = module.base.configuration
+//
+//  name = "client"
+//  image = "opensuse151"
+//  server_configuration = module.server.configuration
+//  // see modules/client/variables.tf for possible values
+//}
+
+module "minion1" {
+  source = "./modules/minion"
   base_configuration = module.base.configuration
 
   name = "client"
